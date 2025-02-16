@@ -12,6 +12,8 @@
 int initialize_board(const char *initial_state, const char *keys, int size);
 int solve(const char *initial_state, const char *keys, int size);
 
+//Self made
+void printBoard();
 
 /* Hints from our solution (feel free to use or ignore):
 

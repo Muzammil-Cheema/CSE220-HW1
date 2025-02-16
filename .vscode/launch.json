@@ -6,7 +6,7 @@
             "request": "launch",
             "name": "Run Game",
             "program": "${workspaceRoot}/build/hw1_game",
-            "args": ["2", "----" "12211221"],
+            "args": ["2", "----", "12211221"],
             "cwd": "${workspaceFolder}",
             "preLaunchTask": "CMake: build"
         },
