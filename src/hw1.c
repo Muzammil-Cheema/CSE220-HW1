@@ -131,8 +131,9 @@ int initialize_board(const char *initial_state, const char *keys, int size) {
 		for (int j = 0; j < size; j++)
 			board[i][j] = initial_state[i*size + j];
     
-    if (checkInitialDuplicates() == 0)
+    if (checkInitialDuplicates() == 0) {
         return 0;
+    }
 	
 	//Stores visible building values in a convenient order for printing
 	int vbCount = 0;
@@ -152,8 +153,9 @@ int initialize_board(const char *initial_state, const char *keys, int size) {
 			visibleBuildings[i] = keys[i-2*size];
 	}
 
-    if (checkInitialKeys() == 0)
+    if (checkInitialKeys() == 0) {
         return 0;
+    }
     
 	return 1;
 }
