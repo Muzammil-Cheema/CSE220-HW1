@@ -102,6 +102,8 @@ void game(){
             printf("Invalid choice. There is already a building with that height in that row or column.\n");
             continue;
         }
+        printf("Check Dupes: %d\t", checkDuplicates(piece, row, col));
+
 
         //Checks
         if (checkKeys(piece, row, col) == 0){
@@ -229,13 +231,16 @@ int emptyCell(int row, int col){
 
 //Requirement 1G
 int checkDuplicates(char piece, int row, int col){
-    for (int i = 0; i < boardSize; i++)
+    for (int i = 0; i < boardSize; i++){
+        printf("Piece%c", piece);
         if(board[row][i] == piece)
             return 0;
-    for (int i = 0; i < boardSize; i++)
+    }
+    for (int i = 0; i < boardSize; i++){
+        printf("Piece%c", piece);
         if(board[i][col] == piece)
             return 0;
-    
+    }
     return 1;
 }
 
