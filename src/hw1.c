@@ -152,7 +152,7 @@ int initialize_board(const char *initial_state, const char *keys, int size) {
 		if (i >= 3*size)
 			visibleBuildings[i] = keys[i-2*size];
 	}
-
+    
     if (checkInitialKeys() == 0) {
         return 0;
     }
