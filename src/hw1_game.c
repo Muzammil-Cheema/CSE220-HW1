@@ -13,7 +13,6 @@ int main(int argc, char **argv) {
         printf("Invalid initial board state.\n");
         return 1;
     }	
-    printf("Anything changed?\n");
     game();
     return 0;
 }

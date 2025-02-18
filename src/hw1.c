@@ -53,7 +53,7 @@ void game(){
                 gameOver = 2;
                 break;
             }
-            if (isValidChoice('p', choice) != 0){
+            if (isValidChoice('p', choice) != 1){
                 printf("Invalid Choice. ");
                 continue;
             }
@@ -81,7 +81,7 @@ void game(){
         //Checks if correct column is chosen.
         validCol = 0;
         while(validCol == 0){
-            printf("Choose a column (0-4): ");
+            printf("Choose a column (0-%d): ", boardSize-1);
             scanf(" %s", choice);
             if (isValidChoice('c', choice) != 1){
                 printf("Invalid Choice. ");
@@ -97,13 +97,12 @@ void game(){
             printf("invalid choice. That space is already occupied.\n");
             continue;
         }
+
         //Checks if there is a dupliacte in the row or col.
         if (checkDuplicates(piece, row, col) == 0) {
             printf("Invalid choice. There is already a building with that height in that row or column.\n");
             continue;
         }
-        printf("Check Dupes: %d\t", checkDuplicates(piece, row, col));
-
 
         //Checks
         if (checkKeys(piece, row, col) == 0){
@@ -111,7 +110,6 @@ void game(){
             continue;
         } 
         
-
         //Checks if board is filled (if game is won).
         if (filledBoardSpaces == boardSize*boardSize){
             gameOver = 1;
@@ -231,16 +229,12 @@ int emptyCell(int row, int col){
 
 //Requirement 1G
 int checkDuplicates(char piece, int row, int col){
-    for (int i = 0; i < boardSize; i++){
-        printf("Piece%c", piece);
+    for (int i = 0; i < boardSize; i++)
         if(board[row][i] == piece)
             return 0;
-    }
-    for (int i = 0; i < boardSize; i++){
-        printf("Piece%c", piece);
+    for (int i = 0; i < boardSize; i++)
         if(board[i][col] == piece)
             return 0;
-    }
     return 1;
 }
 
@@ -287,33 +281,40 @@ int checkFullRow(int row){
     //If row is completed
     int max = 0, visibleCount = 0;
     if (rowComplete == 1){
-        int leftKey = visibleBuildings[2*boardSize + row*2]; 
-        int rightKey = visibleBuildings[2*boardSize + row*2 + 1];
+        int leftKey = visibleBuildings[boardSize + row*2] - '0'; 
+        int rightKey = visibleBuildings[boardSize + row*2 + 1] - '0';
+        // printf("Left: %d \t%d\n", leftKey, boardSize + row*2);
+        // printf("Right: %d \t%d\n", rightKey, boardSize + row*2 + 1);
 
         //Iterate from left to right
         for(int i = 0 ; i < boardSize; i++){
             if (board[row][i] > max){
-                max = board[row][i];
+                max = board[row][i] - '0';
                 visibleCount++;
             }
             if (max == boardSize)
                 break;
         } 
-        if (visibleCount != leftKey)
+        if (visibleCount != leftKey){
+            // printf("LEFTKEY ISSUE\n");
+            // printf("Visible Count: %d\n", visibleCount);
             return 0;
+        }
 
         //Iterate from right to left
         max = 0, visibleCount = 0;
         for(int i = boardSize-1 ; i >= 0; i--){
             if (board[row][i] > max){
-                max = board[row][i];
+                max = board[row][i] - '0';
                 visibleCount++;
             }
             if (max == boardSize)
                 break;
         } 
-        if (visibleCount != rightKey)
+        if (visibleCount != rightKey){
+            // printf("RIGHTKEY ISSUE\n");
             return 0;
+        }
     }
 
     return 1;
@@ -329,13 +330,13 @@ int checkFullCol(int col){
     //If row is completed
     int max = 0, visibleCount = 0;
     if (colComplete == 1){
-        int topKey = visibleBuildings[col];
-        int bottomKey = visibleBuildings[3*boardSize + col];
+        int topKey = visibleBuildings[col] - '0';
+        int bottomKey = visibleBuildings[3*boardSize + col] - '0';
 
         //Iterate from top to bottom
         for(int i = 0 ; i < boardSize; i++){
             if (board[i][col] > max){
-                max = board[i][col];
+                max = board[i][col] - '0';
                 visibleCount++;
             }
             if (max == boardSize)
@@ -348,7 +349,7 @@ int checkFullCol(int col){
         max = 0, visibleCount = 0;
         for(int i = boardSize-1 ; i >= 0; i--){
             if (board[i][col] > max){
-                max = board[i][col];
+                max = board[i][col] - '0';
                 visibleCount++;
             }
             if (max == boardSize)
@@ -365,13 +366,16 @@ int checkFullCol(int col){
 //Track current height max from one end of a row or column until we reach the tallest possible building. Count how many buildings are visible until the tallest possible building is reached. Compare count with key. If different, then return 0. If all counts are the same as their respective keys, then update the board. 
 int checkKeys(char piece, int row, int col){
     board[row][col] = piece;
-
+    // printBoard();
     if (checkFullRow(row) == 0 || checkFullCol(col) == 0){
+        // printf("Row = %d\n", checkFullRow(row));
+        // printf("Col = %d\n", checkFullCol(col));
         board[row][col] = '-';
         return 0;
     }
 
     //If all checks are passed
+    filledBoardSpaces++;
     return 1;
 }
 
