@@ -54,7 +54,7 @@ void game(){
                 break;
             }
             if (isValidChoice('p', choice) != 1){
-                printf("Invalid Choice. ");
+                printf("Invalid choice. ");
                 continue;
             }
             piece = choice[0];
@@ -70,7 +70,7 @@ void game(){
             printf("Choose a row (0-%d): ", boardSize-1);
             scanf(" %s", choice);
             if (isValidChoice('r', choice) != 1){
-                printf("Invalid Choice. ");
+                printf("Invalid choice. ");
                 continue;
             }
             row = choice[0] - '0';
@@ -84,7 +84,7 @@ void game(){
             printf("Choose a column (0-%d): ", boardSize-1);
             scanf(" %s", choice);
             if (isValidChoice('c', choice) != 1){
-                printf("Invalid Choice. ");
+                printf("Invalid choice. ");
                 continue;
             }
             col = choice[0] - '0';
