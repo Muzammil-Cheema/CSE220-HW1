@@ -3,7 +3,6 @@
 #include <stdbool.h>
 #include <assert.h>
 #include "hw1.h"
-
 extern int boardSize;
 extern char visibleBuildings[];
 
@@ -14,7 +13,7 @@ int main(int argc, char **argv) {
         printf("Invalid initial board state.\n");
         return 1;
     }	
-    
+
     game();
     return 0;
 }
