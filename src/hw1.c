@@ -371,7 +371,7 @@ int checkKeys(char piece, int row, int col){
 //Requirement 1H in 1B
 int checkInitialKeys(){
     for(int i = 0; i < boardSize; i++)
-        if (checkFullRow(i) == 0 || checkFullCol(i) == 0);
+        if (checkFullRow(i) == 0 || checkFullCol(i) == 0)
             return 0;
     return 1;
 }
