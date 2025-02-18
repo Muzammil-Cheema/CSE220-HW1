@@ -19,6 +19,10 @@ int isValidChoice(char, char[]);
 int emptyCell(int, int);
 int checkDuplicates(char, int, int);
 int checkInitialDuplicates();
+int checkFullRow(int);
+int checkFullCol(int);
+int checkKeys(char, int, int);
+int checkInitialKeys();
 
 /* Hints from our solution (feel free to use or ignore):
 

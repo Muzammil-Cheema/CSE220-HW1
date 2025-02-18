@@ -28,9 +28,9 @@ char choice[5];
 //Plays the Skyscrapers game
 //Requirement 1D
 void game(){
-    //Initial check of how many baord spaces are pre-filled. Used for winning condition check.
-    for (int i = 0; i < 5; i++)
-        for (int j = 0; j < 5; j++)
+    //Initial check of how many board spaces are pre-filled. Used for winning condition check.
+    for (int i = 0; i < boardSize; i++)
+        for (int j = 0; j < boardSize; j++)
             if (isdigit(board[i][j]) != 0)
                 filledBoardSpaces++;
     
@@ -104,7 +104,7 @@ void game(){
         }
 
         //Checks
-        if (tryMove(piece, row, col) == 0){
+        if (checkKeys(piece, row, col) == 0){
             printf("Invalid choice. You violate one of the key requirements.\n");
             continue;
         } 
@@ -123,13 +123,16 @@ void game(){
 //Requirement 1B
 int initialize_board(const char *initial_state, const char *keys, int size) {
 	if (size < 2 || size > 8)
-		return 1;
+		return 0;
 
 	boardSize = size;
 	//Initializes board values
 	for (int i = 0; i < size; i++)
 		for (int j = 0; j < size; j++)
 			board[i][j] = initial_state[i*size + j];
+    
+    if (checkInitialDuplicates() == 0)
+        return 0;
 	
 	//Stores visible building values in a convenient order for printing
 	int vbCount = 0;
@@ -149,21 +152,11 @@ int initialize_board(const char *initial_state, const char *keys, int size) {
 			visibleBuildings[i] = keys[i-2*size];
 	}
 
-	//i = size		vb == 0
-	// [i] = [i + size - vb/2],
-	// i = size+1	vb == 1
-	// 			, [i] = [i + 2*size - ((vb+1)/2)] 
-	//i = size+2	vb == 2
-	//[i] = [i+size-vb/2]
-	// i = size+3	vb == 3
-	// 			, [i] = [i + 2*size - ((vb+1)/2)]
-
-
-	return 0;
-
-
+    if (checkInitialKeys() == 0)
+        return 0;
+    
+	return 1;
 }
-
 
 //Requirement 1C
 void printBoard(){
@@ -199,7 +192,6 @@ void printBoard(){
     printf("\n");
 }
 
-
 //Requeirement 1E assitance
 int isValidChoice(char question, char response[]){
     if (strcmp(response, "q") == 0)
@@ -226,14 +218,12 @@ int isValidChoice(char question, char response[]){
     return 1;
 }
 
-
 //Requirement 1F
 int emptyCell(int row, int col){
     if (board[row][col] != '-')
         return 0; 
     return 1;
 }
-
 
 //Requirement 1G
 int checkDuplicates(char piece, int row, int col){
@@ -246,7 +236,6 @@ int checkDuplicates(char piece, int row, int col){
     
     return 1;
 }
-
 
 //Requirement 1G in 1B
 int checkInitialDuplicates(){
@@ -281,25 +270,16 @@ int checkInitialDuplicates(){
     return 1;
 }
 
-
-//Requirement 1H
-//Track current height max from one end of a row or column until we reach the tallest possible building. Count how many buildings are visible until the tallest possible building is reached. Compare count with key. If different, then return error. If all counts are the same as their respective keys, then update the board. 
-int tryMove(char piece, int row, int col){
-    board[row][col] = piece;
-
-    //Check row and column completion. 
-    int rowCompleted, colCompleted;
-    rowCompleted = colCompleted = -boardSize + 1;
-    for (int i = 0; i < boardSize; i++){
+//Requirement 1H row completion
+int checkFullRow(int row){
+    int rowComplete = -boardSize + 1;
+    for (int i = 0; i < boardSize; i++)
         if (board[row][i] != '-')
-            rowCompleted++;
-        if (board[i][col] != '-')
-            colCompleted++;
-    }
+            rowComplete++;
 
     //If row is completed
     int max = 0, visibleCount = 0;
-    if (rowCompleted == 1){
+    if (rowComplete == 1){
         int leftKey = visibleBuildings[2*boardSize + row*2]; 
         int rightKey = visibleBuildings[2*boardSize + row*2 + 1];
 
@@ -329,16 +309,26 @@ int tryMove(char piece, int row, int col){
             return 0;
     }
 
-    max = 0, visibleCount = 0;
-    //If column is completed
-    if (colCompleted == 1){
+    return 1;
+}
+
+//Requirement 1H column completion
+int checkFullCol(int col){
+    int colComplete = -boardSize + 1;
+    for (int i = 0; i < boardSize; i++)
+        if (board[i][col] != '-')
+            colComplete++;
+
+    //If row is completed
+    int max = 0, visibleCount = 0;
+    if (colComplete == 1){
         int topKey = visibleBuildings[col];
         int bottomKey = visibleBuildings[3*boardSize + col];
 
         //Iterate from top to bottom
         for(int i = 0 ; i < boardSize; i++){
             if (board[i][col] > max){
-                max = board[row][i];
+                max = board[i][col];
                 visibleCount++;
             }
             if (max == boardSize)
@@ -351,7 +341,7 @@ int tryMove(char piece, int row, int col){
         max = 0, visibleCount = 0;
         for(int i = boardSize-1 ; i >= 0; i--){
             if (board[i][col] > max){
-                max = board[row][i];
+                max = board[i][col];
                 visibleCount++;
             }
             if (max == boardSize)
@@ -360,13 +350,31 @@ int tryMove(char piece, int row, int col){
         if (visibleCount != bottomKey)
             return 0;
     }
-    
+
+    return 1;
+}
+
+//Requirement 1H
+//Track current height max from one end of a row or column until we reach the tallest possible building. Count how many buildings are visible until the tallest possible building is reached. Compare count with key. If different, then return 0. If all counts are the same as their respective keys, then update the board. 
+int checkKeys(char piece, int row, int col){
+    board[row][col] = piece;
+
+    if (checkFullRow(row) == 0 || checkFullCol(col) == 0){
+        board[row][col] = '-';
+        return 0;
+    }
+
     //If all checks are passed
     return 1;
 }
 
-
-
+//Requirement 1H in 1B
+int checkInitialKeys(){
+    for(int i = 0; i < boardSize; i++)
+        if (checkFullRow(i) == 0 || checkFullCol(i) == 0);
+            return 0;
+    return 1;
+}
 
 int solve(const char *initial_state, const char *keys, int size){
 	(void) initial_state;
@@ -384,21 +392,3 @@ int solve(const char *initial_state, const char *keys, int size){
 //Range of visible buildings from both ends of one row/column is [2, n+1] where n is the board size. 
 //Strings can be traversed and stored as char pointers!!
 //Last argument (visible buildings) is ordered as top, bottom, left, right
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
