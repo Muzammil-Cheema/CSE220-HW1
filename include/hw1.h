@@ -13,7 +13,12 @@ int initialize_board(const char *initial_state, const char *keys, int size);
 int solve(const char *initial_state, const char *keys, int size);
 
 //Self made
+void game();
 void printBoard();
+int isValidChoice(char, char[]);
+int emptyCell(int, int);
+int checkDuplicates(char, int, int);
+int checkInitialDuplicates();
 
 /* Hints from our solution (feel free to use or ignore):
 
