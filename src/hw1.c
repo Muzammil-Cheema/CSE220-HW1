@@ -1,3 +1,115 @@
+// #include <stdio.h>
+// #include <stdlib.h>
+// #include <stdbool.h>
+// #include <assert.h>
+// #include <ctype.h>
+// #include <string.h>
+// #include "hw1.h"
+
+// int top_key[MAX_LENGTH] = {0};
+// int bottom_key[MAX_LENGTH] = {0};
+// int left_key[MAX_LENGTH] = {0};
+// int right_key[MAX_LENGTH] = {0};
+// int boardSize;
+
+// //Game Board
+// char board[MAX_LENGTH][MAX_LENGTH] = {0};
+// //Reading input
+// char choice[5];
+
+// int initialize_board(const char *initial_state, const char *keys, int size){
+//     boardSize = size;
+
+//     //Set board
+//     for (int i = 0; i < boardSize; i++){
+//         for (int j = 0; j < boardSize; j++){
+//             board[i][j] = initial_state[i*boardSize + j];
+//         }
+//     }
+
+//     //Set keys
+//     for (int i = 0; i < boardSize; i++){
+//         top_key[i] = keys[i] - '0';
+//     }
+//     for (int i = 0; i < boardSize; i++){
+//         bottom_key[i] = keys[boardSize + i] - '0';
+//     }
+//     for (int i = 0; i < boardSize; i++){
+//         left_key[i] = keys[i] - '0';
+//     }
+//     for (int i = 0; i < boardSize; i++){
+//         right_key[i] = keys[i] - '0';
+//     }
+
+//     return 1;
+// }
+
+// void printBoard(){
+//     printf("   ");
+//     for (int i = 0; i < boardSize; i++){
+//         printf(" %d", top_key[i]);
+//     }
+//     printf("\n   ");
+//     for (int i = 0; i < boardSize; i++){
+//         printf(" v");
+//     }
+
+
+//     for (int i = 0; i < boardSize; i++){
+//         printf("%d >");
+//         for (int j = 0; j < boardSize; j++){
+
+//         }
+//     }
+
+// }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -228,6 +340,7 @@ int emptyCell(int row, int col){
 
 //Requirement 1G
 int checkDuplicates(char piece, int row, int col){
+    return 1;
     for (int i = 0; i < boardSize; i++)
         if(board[row][i] == piece)
             return 0;
@@ -397,7 +510,7 @@ int solve(const char *initial_state, const char *keys, int size){
 
 
 
-//Observations
-//Range of visible buildings from both ends of one row/column is [2, n+1] where n is the board size. 
-//Strings can be traversed and stored as char pointers!!
-//Last argument (visible buildings) is ordered as top, bottom, left, right
+// //Observations
+// //Range of visible buildings from both ends of one row/column is [2, n+1] where n is the board size. 
+// //Strings can be traversed and stored as char pointers!!
+// //Last argument (visible buildings) is ordered as top, bottom, left, right

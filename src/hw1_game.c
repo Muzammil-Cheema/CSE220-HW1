@@ -3,8 +3,8 @@
 #include <stdbool.h>
 #include <assert.h>
 #include "hw1.h"
-extern int boardSize;
-extern char visibleBuildings[];
+// extern int boardSize;
+// extern char visibleBuildings[];
 
 //Requirement 1A
 int main(int argc, char **argv) {
