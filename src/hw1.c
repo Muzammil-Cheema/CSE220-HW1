@@ -265,9 +265,9 @@ int initialize_board(const char *initial_state, const char *keys, int size) {
         bottom_key[i] = keys[boardSize + i] - '0';
     for (int i = 0; i < boardSize; i++)
         left_key[i] = keys[boardSize*2 + i] - '0';
-    for (int i = 0; i < boardSize; i++)
+    for (int i = 0; i < boardSize; i++){
         right_key[i] = keys[boardSize*3 + i] - '0';
-    
+    }
     
 	return 1;
 }
