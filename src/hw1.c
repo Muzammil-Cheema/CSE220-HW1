@@ -53,14 +53,26 @@
 //     for (int i = 0; i < boardSize; i++){
 //         printf(" v");
 //     }
+//     printf("\n");
 
 
 //     for (int i = 0; i < boardSize; i++){
-//         printf("%d >");
+//         printf("%d >", left_key[i]);
 //         for (int j = 0; j < boardSize; j++){
-
+//             printf(" %c", board[i][j]);
 //         }
+//         printf(" < %d\n", right_key[i]);
 //     }
+
+//     printf("   ");
+//     for (int i = 0; i < boardSize; i++){
+//         printf(" ^");
+//     }
+//     printf("\n   ");
+//     for (int i = 0; i < boardSize; i++){
+//         printf(" %d", bottom_key[i]);
+//     }
+//     printf("\n");
 
 // }
 
@@ -132,7 +144,7 @@ int filledBoardSpaces = 0;
 //Game Board
 char board[MAX_LENGTH][MAX_LENGTH] = {0};
 //Stores top row, then alternates between left and right keys, ends with bottom key row. 
-char visibleBuildings[4*MAX_LENGTH];
+// char visibleBuildings[4*MAX_LENGTH];
 //User choice string variable
 char choice[5];
 
@@ -155,6 +167,12 @@ void game(){
     //Skyscrapers main game logic.
     while (gameOver == 0){
         printBoard();
+        // for (int i = 0; i < MAX_LENGTH; i++){
+        //     for (int j = 0; j < MAX_LENGTH; j++){
+        //         printf(" %c", board[i][j]);
+        //     }
+        //     printf("\n");
+        // }
 
         //Checks if correct piece is chosen.
         validPiece = 0;
@@ -222,6 +240,9 @@ void game(){
             continue;
         } 
         
+        // board[row][col] = piece;
+        // filledBoardSpaces++;
+
         //Checks if board is filled (if game is won).
         if (filledBoardSpaces == boardSize*boardSize){
             gameOver = 1;
@@ -238,71 +259,118 @@ int initialize_board(const char *initial_state, const char *keys, int size) {
 
 	boardSize = size;
 	//Initializes board values
-	for (int i = 0; i < size; i++)
+	for (int i = 0; i < boardSize; i++)
 		for (int j = 0; j < size; j++)
 			board[i][j] = initial_state[i*size + j];
     
-    if (checkInitialDuplicates() == 0) {
-        return 0;
-    }
+    // if (checkInitialDuplicates() == 0) {
+    //     return 0;
+    // }
 	
-	//Stores visible building values in a convenient order for printing
-	int vbCount = 0;
-	for (int i = 0; i < size*4; i++){
-		if (i < size)
-			visibleBuildings[i] = keys[i];
-		if (i >= size && i < 3*size && vbCount%2 == 0){
-			visibleBuildings[i] = keys[i + size - vbCount/2];
-			vbCount++;
-            continue;
-		}
-		if (i >= size && i < 3*size && vbCount%2 == 1){
-			visibleBuildings[i] = keys[i + 2*size - (vbCount+1)/2];
-			vbCount++;
-		}
-		if (i >= 3*size)
-			visibleBuildings[i] = keys[i-2*size];
-	}
-    
-    if (checkInitialKeys() == 0) {
-        return 0;
+
+    //Set keys
+    for (int i = 0; i < boardSize; i++){
+        top_key[i] = keys[i] - '0';
     }
+    for (int i = 0; i < boardSize; i++){
+        bottom_key[i] = keys[boardSize + i] - '0';
+    }
+    for (int i = 0; i < boardSize; i++){
+        left_key[i] = keys[boardSize*2 + i] - '0';
+    }
+    for (int i = 0; i < boardSize; i++){
+        right_key[i] = keys[boardSize*3 + i] - '0';
+    }
+
+	//Stores visible building values in a convenient order for printing
+	// int vbCount = 0;
+	// for (int i = 0; i < size*4; i++){
+	// 	if (i < size)
+	// 		visibleBuildings[i] = keys[i];
+	// 	if (i >= size && i < 3*size && vbCount%2 == 0){
+	// 		visibleBuildings[i] = keys[i + size - vbCount/2];
+	// 		vbCount++;
+    //         continue;
+	// 	}
+	// 	if (i >= size && i < 3*size && vbCount%2 == 1){
+	// 		visibleBuildings[i] = keys[i + 2*size - (vbCount+1)/2];
+	// 		vbCount++;
+	// 	}
+	// 	if (i >= 3*size)
+	// 		visibleBuildings[i] = keys[i-2*size];
+	// }
+    
+    // if (checkInitialKeys() == 0) {
+    //     return 0;
+    // }
     
 	return 1;
 }
 
 //Requirement 1C
+// void printBoard(){
+//     //prints top rows
+// 	int i = 0; 
+//     printf("   ");
+// 	for (; i < boardSize; i++)
+// 		printf(" %c", top_key[i]);
+// 	printf("\n   ");
+//     for (int j = 0; j < boardSize; j++)
+// 	    printf(" v");
+//     printf("\n");
+
+//     //prints board/middle rows
+//     int row = 0;
+// 	while(i < 3*boardSize){
+//         printf("%c > ", visibleBuildings[i]);
+//         i++;
+//         for (int col= 0; col < boardSize; col++)
+//             printf("%c ", board[row][col]);
+//         row++;
+//         printf("< %c\n", visibleBuildings[i]);
+//         i++;
+//     }
+
+//     //prints bottom rows
+// 	printf("   ");
+//     for (int j = 0; j < boardSize; j++)
+//         printf(" ^");
+//     printf("\n   ");
+//     for (; i < 4*boardSize; i++)
+//         printf(" %c", visibleBuildings[i]);
+//     printf("\n");
+// }
+
 void printBoard(){
-    //prints top rows
-	int i = 0; 
     printf("   ");
-	for (; i < boardSize; i++)
-		printf(" %c", visibleBuildings[i]);
-	printf("\n   ");
-    for (int j = 0; j < boardSize; j++)
-	    printf(" v");
+    for (int i = 0; i < boardSize; i++){
+        printf(" %d", top_key[i]);
+    }
+    printf("\n   ");
+    for (int i = 0; i < boardSize; i++){
+        printf(" v");
+    }
     printf("\n");
 
-    //prints board/middle rows
-    int row = 0;
-	while(i < 3*boardSize){
-        printf("%c > ", visibleBuildings[i]);
-        i++;
-        for (int col= 0; col < boardSize; col++)
-            printf("%c ", board[row][col]);
-        row++;
-        printf("< %c\n", visibleBuildings[i]);
-        i++;
+
+    for (int i = 0; i < boardSize; i++){
+        printf("%d >", left_key[i]);
+        for (int j = 0; j < boardSize; j++){
+            printf(" %c", board[i][j]);
+        }
+        printf(" < %d\n", right_key[i]);
     }
 
-    //prints bottom rows
-	printf("   ");
-    for (int j = 0; j < boardSize; j++)
+    printf("   ");
+    for (int i = 0; i < boardSize; i++){
         printf(" ^");
+    }
     printf("\n   ");
-    for (; i < 4*boardSize; i++)
-        printf(" %c", visibleBuildings[i]);
+    for (int i = 0; i < boardSize; i++){
+        printf(" %d", bottom_key[i]);
+    }
     printf("\n");
+
 }
 
 //Requeirement 1E assitance
@@ -331,16 +399,15 @@ int isValidChoice(char question, char response[]){
     return 1;
 }
 
-//Requirement 1F
+// //Requirement 1F
 int emptyCell(int row, int col){
     if (board[row][col] != '-')
         return 0; 
     return 1;
 }
 
-//Requirement 1G
+// //Requirement 1G
 int checkDuplicates(char piece, int row, int col){
-    return 1;
     for (int i = 0; i < boardSize; i++)
         if(board[row][i] == piece)
             return 0;
@@ -350,41 +417,42 @@ int checkDuplicates(char piece, int row, int col){
     return 1;
 }
 
-//Requirement 1G in 1B
-int checkInitialDuplicates(){
-    //Define and initialize array to track duplicates in each row or column
-    int singleEntry[boardSize];
-    for (int i = 0; i < boardSize; i++){
-        singleEntry[i] = 0;
-    }
+// //Requirement 1G in 1B
+// int checkInitialDuplicates(){
+//     //Define and initialize array to track duplicates in each row or column
+//     int singleEntry[boardSize];
+//     for (int i = 0; i < boardSize; i++){
+//         singleEntry[i] = 0;
+//     }
 
-    //Check rows
-    for (int i = 0; i < boardSize; i++){
-        for (int j = 0; j < boardSize; j++)
-            singleEntry[board[i][j]-1]++;
-        for (int j = 0; j < boardSize; j++)
-            if(singleEntry[j] > 1)
-                return 0;
-        for (int j = 0; j < boardSize; j++)
-            singleEntry[j] = 0;
-    }
+//     //Check rows
+//     for (int i = 0; i < boardSize; i++){
+//         for (int j = 0; j < boardSize; j++)
+//             singleEntry[board[i][j]-1]++;
+//         for (int j = 0; j < boardSize; j++)
+//             if(singleEntry[j] > 1)
+//                 return 0;
+//         for (int j = 0; j < boardSize; j++)
+//             singleEntry[j] = 0;
+//     }
 
-    //Check columns
-    for (int i = 0; i < boardSize; i++){
-        for (int j = 0; j < boardSize; j++)
-            singleEntry[board[j][i]-1]++;
-        for (int j = 0; j < boardSize; j++)
-            if(singleEntry[j] > 1)
-                return 0;
-        for (int j = 0; j < boardSize; j++)
-            singleEntry[j] = 0;
-    }
+//     //Check columns
+//     for (int i = 0; i < boardSize; i++){
+//         for (int j = 0; j < boardSize; j++)
+//             singleEntry[board[j][i]-1]++;
+//         for (int j = 0; j < boardSize; j++)
+//             if(singleEntry[j] > 1)
+//                 return 0;
+//         for (int j = 0; j < boardSize; j++)
+//             singleEntry[j] = 0;
+//     }
 
-    return 1;
-}
+//     return 1;
+// }
 
 //Requirement 1H row completion
 int checkFullRow(int row){
+    //Check if row is completed
     int rowComplete = -boardSize + 1;
     for (int i = 0; i < boardSize; i++)
         if (board[row][i] != '-')
@@ -393,8 +461,8 @@ int checkFullRow(int row){
     //If row is completed
     int max = 0, visibleCount = 0;
     if (rowComplete == 1){
-        int leftKey = visibleBuildings[boardSize + row*2] - '0'; 
-        int rightKey = visibleBuildings[boardSize + row*2 + 1] - '0';
+        int leftKey = left_key[row]; 
+        int rightKey = right_key[row];
 
         //Iterate from left to right
         if (leftKey != 0){
@@ -430,57 +498,62 @@ int checkFullRow(int row){
     return 1;
 }
 
-//Requirement 1H column completion
-int checkFullCol(int col){
-    int colComplete = -boardSize + 1;
-    for (int i = 0; i < boardSize; i++)
-        if (board[i][col] != '-')
-            colComplete++;
+// //Requirement 1H column completion
+// int checkFullCol(int col){
+//     int colComplete = -boardSize + 1;
+//     for (int i = 0; i < boardSize; i++)
+//         if (board[i][col] != '-')
+//             colComplete++;
 
-    //If column is completed
-    int max = 0, visibleCount = 0;
-    if (colComplete == 1){
-        int topKey = visibleBuildings[col] - '0';
-        int bottomKey = visibleBuildings[3*boardSize + col] - '0';
+//     //If column is completed
+//     int max = 0, visibleCount = 0;
+//     if (colComplete == 1){
+//         int topKey = top_key[col];
+//         int bottomKey = bottom_key[col];
 
-        //Iterate from top to bottom
-        if (topKey != 0){
-            for(int i = 0 ; i < boardSize; i++){
-                if (board[i][col] - '0' > max){
-                    max = board[i][col] - '0';
-                    visibleCount++;
-                }
-                if (max == boardSize)
-                    break;
-            } 
-            if (visibleCount != topKey)
-                return 0;
-        }
+//         //Iterate from top to bottom
+//         if (topKey != 0){
+//             for(int i = 0 ; i < boardSize; i++){
+//                 if (board[i][col] - '0' > max){
+//                     max = board[i][col] - '0';
+//                     visibleCount++;
+//                 }
+//                 if (max == boardSize)
+//                     break;
+//             } 
+//             if (visibleCount != topKey)
+//                 return 0;
+//         }
 
-        //Iterate from bottom to top
-        if (bottomKey != 0){
-            max = 0, visibleCount = 0;
-            for(int i = boardSize-1 ; i >= 0; i--){
-                if (board[i][col] - '0' > max){
-                    max = board[i][col] - '0';
-                    visibleCount++;
-                }
-                if (max == boardSize)
-                    break;
-            } 
-            if (visibleCount != bottomKey)
-                return 0;
-        }
-    }
+//         //Iterate from bottom to top
+//         if (bottomKey != 0){
+//             max = 0, visibleCount = 0;
+//             for(int i = boardSize-1 ; i >= 0; i--){
+//                 if (board[i][col] - '0' > max){
+//                     max = board[i][col] - '0';
+//                     visibleCount++;
+//                 }
+//                 if (max == boardSize)
+//                     break;
+//             } 
+//             if (visibleCount != bottomKey)
+//                 return 0;
+//         }
+//     }
 
-    return 1;
-}
+//     return 1;
+// }
 
-//Requirement 1H
-//Track current height max from one end of a row or column until we reach the tallest possible building. Count how many buildings are visible until the tallest possible building is reached. Compare count with key. If different, then return 0. If all counts are the same as their respective keys, then update the board. 
+// //Requirement 1H
+// //Track current height max from one end of a row or column until we reach the tallest possible building. Count how many buildings are visible until the tallest possible building is reached. Compare count with key. If different, then return 0. If all counts are the same as their respective keys, then update the board. 
 int checkKeys(char piece, int row, int col){
     board[row][col] = piece;
-    if (checkFullRow(row) == 0 || checkFullCol(col) == 0){
+    // if (checkFullRow(row) == 0 || checkFullCol(col) == 0){
+    //     board[row][col] = '-';
+    //     return 0;
+    // }
+
+    if(checkFullRow(row) == 0){
         board[row][col] = '-';
         return 0;
     }
@@ -490,21 +563,21 @@ int checkKeys(char piece, int row, int col){
     return 1;
 }
 
-//Requirement 1H in 1B
-int checkInitialKeys(){
-    for(int i = 0; i < boardSize; i++)
-        if (checkFullRow(i) == 0 || checkFullCol(i) == 0)
-            return 0;
-    return 1;
-}
+// //Requirement 1H in 1B
+// int checkInitialKeys(){
+//     for(int i = 0; i < boardSize; i++)
+//         if (checkFullRow(i) == 0 || checkFullCol(i) == 0)
+//             return 0;
+//     return 1;
+// }
 
-int solve(const char *initial_state, const char *keys, int size){
-	(void) initial_state;
-	(void) keys;
-	(void) size;
+// int solve(const char *initial_state, const char *keys, int size){
+// 	(void) initial_state;
+// 	(void) keys;
+// 	(void) size;
 	
-	return 0;
-}
+// 	return 0;
+// }
 
 
 
