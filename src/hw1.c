@@ -571,13 +571,13 @@ int checkKeys(char piece, int row, int col){
 //     return 1;
 // }
 
-// int solve(const char *initial_state, const char *keys, int size){
-// 	(void) initial_state;
-// 	(void) keys;
-// 	(void) size;
+int solve(const char *initial_state, const char *keys, int size){
+	(void) initial_state;
+	(void) keys;
+	(void) size;
 	
-// 	return 0;
-// }
+	return 0;
+}
 
 
 
