@@ -63,3 +63,6 @@ tests/actual_outputs
 tests/expected_outputs
 *.log
 test_detail.xml
+
+#Made myself
+hw1_game.txt
