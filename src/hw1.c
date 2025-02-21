@@ -31,7 +31,7 @@ void game(){
     //Initial check of how many board spaces are pre-filled. Used for winning condition check.
     for (int i = 0; i < boardSize; i++)
         for (int j = 0; j < boardSize; j++)
-            if (isdigit(board[i][j]) != 0)
+            if (isdigit(board[i][j]))
                 filledBoardSpaces++;
     
 
@@ -104,7 +104,7 @@ void game(){
             continue;
         }
 
-        //Checks
+        //Checks key requirements
         if (checkKeys(piece, row, col) == 0){
             printf("Invalid choice. You violate one of the key requirements.\n");
             continue;
@@ -287,7 +287,7 @@ int checkFullRow(int row){
         //Iterate from left to right
         if (leftKey != 0){
             for(int i = 0 ; i < boardSize; i++){
-                if (board[row][i] > max){
+                if (board[row][i] - '0' > max){
                     max = board[row][i] - '0';
                     visibleCount++;
                 }
@@ -302,15 +302,16 @@ int checkFullRow(int row){
         if(rightKey != 0){
             max = 0, visibleCount = 0;
             for(int i = boardSize-1 ; i >= 0; i--){
-                if (board[row][i] > max){
+                if (board[row][i] - '0' > max){
                     max = board[row][i] - '0';
                     visibleCount++;
                 }
                 if (max == boardSize)
                     break;
             } 
-            if (visibleCount != rightKey)
+            if (visibleCount != rightKey){
                 return 0;
+            }
         }
     }
 
@@ -333,7 +334,7 @@ int checkFullCol(int col){
         //Iterate from top to bottom
         if (topKey != 0){
             for(int i = 0 ; i < boardSize; i++){
-                if (board[i][col] > max){
+                if (board[i][col] - '0' > max){
                     max = board[i][col] - '0';
                     visibleCount++;
                 }
@@ -348,7 +349,7 @@ int checkFullCol(int col){
         if (bottomKey != 0){
             max = 0, visibleCount = 0;
             for(int i = boardSize-1 ; i >= 0; i--){
-                if (board[i][col] > max){
+                if (board[i][col] - '0' > max){
                     max = board[i][col] - '0';
                     visibleCount++;
                 }
