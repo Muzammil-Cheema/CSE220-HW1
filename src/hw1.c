@@ -1,127 +1,3 @@
-// #include <stdio.h>
-// #include <stdlib.h>
-// #include <stdbool.h>
-// #include <assert.h>
-// #include <ctype.h>
-// #include <string.h>
-// #include "hw1.h"
-
-// int top_key[MAX_LENGTH] = {0};
-// int bottom_key[MAX_LENGTH] = {0};
-// int left_key[MAX_LENGTH] = {0};
-// int right_key[MAX_LENGTH] = {0};
-// int boardSize;
-
-// //Game Board
-// char board[MAX_LENGTH][MAX_LENGTH] = {0};
-// //Reading input
-// char choice[5];
-
-// int initialize_board(const char *initial_state, const char *keys, int size){
-//     boardSize = size;
-
-//     //Set board
-//     for (int i = 0; i < boardSize; i++){
-//         for (int j = 0; j < boardSize; j++){
-//             board[i][j] = initial_state[i*boardSize + j];
-//         }
-//     }
-
-//     //Set keys
-//     for (int i = 0; i < boardSize; i++){
-//         top_key[i] = keys[i] - '0';
-//     }
-//     for (int i = 0; i < boardSize; i++){
-//         bottom_key[i] = keys[boardSize + i] - '0';
-//     }
-//     for (int i = 0; i < boardSize; i++){
-//         left_key[i] = keys[i] - '0';
-//     }
-//     for (int i = 0; i < boardSize; i++){
-//         right_key[i] = keys[i] - '0';
-//     }
-
-//     return 1;
-// }
-
-// void printBoard(){
-//     printf("   ");
-//     for (int i = 0; i < boardSize; i++){
-//         printf(" %d", top_key[i]);
-//     }
-//     printf("\n   ");
-//     for (int i = 0; i < boardSize; i++){
-//         printf(" v");
-//     }
-//     printf("\n");
-
-
-//     for (int i = 0; i < boardSize; i++){
-//         printf("%d >", left_key[i]);
-//         for (int j = 0; j < boardSize; j++){
-//             printf(" %c", board[i][j]);
-//         }
-//         printf(" < %d\n", right_key[i]);
-//     }
-
-//     printf("   ");
-//     for (int i = 0; i < boardSize; i++){
-//         printf(" ^");
-//     }
-//     printf("\n   ");
-//     for (int i = 0; i < boardSize; i++){
-//         printf(" %d", bottom_key[i]);
-//     }
-//     printf("\n");
-
-// }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -129,7 +5,7 @@
 #include <ctype.h>
 #include <string.h>
 #include "hw1.h"
-//gcc -g -Iinclude -o hw1_game src/hw1.c src/hw1_game.c
+
 
 
 int top_key[MAX_LENGTH] = {0};
@@ -141,12 +17,14 @@ int gameOver = 0;
 int filledBoardSpaces = 0;
 
 
+
 //Game Board
 char board[MAX_LENGTH][MAX_LENGTH] = {0};
 //Stores top row, then alternates between left and right keys, ends with bottom key row. 
 // char visibleBuildings[4*MAX_LENGTH];
 //User choice string variable
 char choice[5];
+
 
 
 //Plays the Skyscrapers game
@@ -334,14 +212,14 @@ int isValidChoice(char question, char response[]){
     return 1;
 }
 
-// //Requirement 1F
+//Requirement 1F
 int emptyCell(int row, int col){
     if (board[row][col] != '-')
         return 0; 
     return 1;
 }
 
-// //Requirement 1G
+//Requirement 1G
 int checkDuplicates(char piece, int row, int col){
     for (int i = 0; i < boardSize; i++)
         if(board[row][i] == piece)
@@ -479,8 +357,7 @@ int checkFullCol(int col){
     return 1;
 }
 
-// //Requirement 1H
-// //Track current height max from one end of a row or column until we reach the tallest possible building. Count how many buildings are visible until the tallest possible building is reached. Compare count with key. If different, then return 0. If all counts are the same as their respective keys, then update the board. 
+//Requirement 1H
 int checkKeys(char piece, int row, int col){
     board[row][col] = piece;
     if (checkFullRow(row) == 0 || checkFullCol(col) == 0){
@@ -493,7 +370,7 @@ int checkKeys(char piece, int row, int col){
     return 1;
 }
 
-// //Requirement 1H in 1B
+//Requirement 1H in 1B
 int checkInitialKeys(){
     for(int i = 0; i < boardSize; i++)
         if (checkFullRow(i) == 0 || checkFullCol(i) == 0)
@@ -513,7 +390,7 @@ int solve(const char *initial_state, const char *keys, int size){
 
 
 
-// //Observations
-// //Range of visible buildings from both ends of one row/column is [2, n+1] where n is the board size. 
-// //Strings can be traversed and stored as char pointers!!
-// //Last argument (visible buildings) is ordered as top, bottom, left, right
+//Observations
+//Range of visible buildings from both ends of one row/column is [2, n+1] where n is the board size. 
+//Strings can be traversed and stored as char pointers!!
+//Last argument (visible buildings) is ordered as top, bottom, left, right
