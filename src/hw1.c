@@ -5,7 +5,7 @@
 #include <ctype.h>
 #include <string.h>
 #include "hw1.h"
-
+//gcc -g -Iinclude -o hw1_game src/hw1.c src/hw1_game.c
 
 
 int top_key[MAX_LENGTH] = {0};
