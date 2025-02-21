@@ -64,5 +64,5 @@ tests/expected_outputs
 *.log
 test_detail.xml
 
-#Made myself
+#Made myself for debugging
 hw1_game

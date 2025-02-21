@@ -119,7 +119,6 @@ void game(){
     }
 }
 
-
 //Requirement 1B
 int initialize_board(const char *initial_state, const char *keys, int size) {
 	if (size < 2 || size > 8)
