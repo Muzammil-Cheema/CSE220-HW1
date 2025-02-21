@@ -269,8 +269,9 @@ int initialize_board(const char *initial_state, const char *keys, int size) {
         right_key[i] = keys[boardSize*3 + i] - '0';
     }
     
-    if (checkInitialKeys() == 0)
+    if (checkInitialKeys() == 0){
         return 0;
+    }
 	return 1;
 }
 
