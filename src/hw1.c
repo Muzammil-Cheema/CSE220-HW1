@@ -238,22 +238,30 @@ int checkInitialDuplicates(){
 
     //Check rows
     for (int i = 0; i < boardSize; i++){
+        //Counts occurences of each digit in row
         for (int j = 0; j < boardSize; j++)
-            singleEntry[board[i][j]-'0'-1]++;
+            if (isdigit(board[i][j]))
+                singleEntry[board[i][j]-'1']++;
+        //Returns 0 if any count is greater than 1
         for (int j = 0; j < boardSize; j++)
             if(singleEntry[j] > 1)
                 return 0;
+        //Resets counts to 0 for next iteration
         for (int j = 0; j < boardSize; j++)
             singleEntry[j] = 0;
     }
 
     //Check columns
     for (int i = 0; i < boardSize; i++){
+        //Counts occurences of each digit in column
         for (int j = 0; j < boardSize; j++)
-            singleEntry[board[j][i]-'0'-1]++;
+            if (isdigit(board[j][i]))
+                singleEntry[board[j][i]-'1']++;
+        //Returns 0 if any count is greater than 1
         for (int j = 0; j < boardSize; j++)
             if(singleEntry[j] > 1)
                 return 0;
+        //Resets counts to 0 for next iteration
         for (int j = 0; j < boardSize; j++)
             singleEntry[j] = 0;
     }
