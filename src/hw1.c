@@ -422,7 +422,7 @@ int solve(const char *initial_state, const char *keys, int size){
     printConstraints();
 
     edgeClueElimination();
-    // constraintPropagation();
+    constraintPropagation();
 
     printBoard();
     printConstraints();
@@ -479,12 +479,11 @@ int returnCol(int clueIndex){
 
 //Adds a board value and removes constraints from the corresponding cell by setting constraint to the determined board value. 
 void setValue(char val, int row, int col){
-    if (board[row][col] == '-')
-        board[row][col] = val;
+    board[row][col] = val;
     constraints[row][col][0] = val;
     constraints[row][col][1] = '\0'; 
-    printf("Value ");
-    printCellConstraints(row, col);
+    // printf("Value ");
+    // printCellConstraints(row, col);
 }
 
 //Removes the given character from the constraints list at a given cell. If one constraint is left, then the board value is set using setValue. If all constraints are removed, the constraints string is set to "X". 
@@ -507,17 +506,15 @@ void removeConstraint(int val, int row, int col){
         i++;
     }
 
-    //If there's only one possible value left, set the value and constraint to that value
-    // if (strlen(constraints[row][col]) == 1)
-    //     setValue(val, row, col);
+    
     //If there are no possible values left for the cell, constraints for that cell are set to "X".  
     if (strlen(constraints[row][col]) == 0){
         s[0] = 'X';
         s[1] = '\0';
     }
 
-    printf("Remove ");
-    printCellConstraints(row, col);
+    // printf("Remove ");
+    // printCellConstraints(row, col);
 }
 
 //Apply edge clue elimnation heuristic with each given clue
@@ -634,12 +631,19 @@ void edgeClueElimination(){
 //Heuristic 2
 //When a board value is determined, that value is removed from the possibilities of all other cells that share a row or column with the solved cell. 
 void cellProp(int val, int row, int col){
-    for (int i = 0; i < boardSize; i++)
+    //Iterate over a given row
+    for (int i = 0; i < boardSize; i++){
         if (!isdigit(board[row][i]))
             removeConstraint(val, row, i);
-    for (int i = 0; i < boardSize; i++)
+        if (strlen(constraints[row][i]) == 1)
+            setValue(constraints[row][i][0], row, i);
+    }
+    for (int i = 0; i < boardSize; i++){
         if (!isdigit(board[i][col]))
             removeConstraint(val, i, col);
+        if (strlen(constraints[i][col]) == 1)
+            setValue(constraints[i][col][0], i, col);
+    }
 }
 
 //Used to compare the constraints 3D array before and after constraint propagation.
@@ -668,7 +672,7 @@ void constraintPropagation(){
                 if (isdigit(board[i][j]))
                     cellProp(board[i][j]-'0', i, j);
     
-        //Ends propagation loop when no new values are determined on the board. 
+        //Ends propagation loop when no new constraints are removed. 
         fullyPropagated = compareConstraints(prePropConstraints);
     }
 }
