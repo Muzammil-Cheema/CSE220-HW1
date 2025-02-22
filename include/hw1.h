@@ -12,7 +12,7 @@
 int initialize_board(const char *initial_state, const char *keys, int size);
 int solve(const char *initial_state, const char *keys, int size);
 
-//Self made
+//Part 1 Game
 void game();
 void printBoard();
 int isValidChoice(char, char[]);
@@ -23,6 +23,15 @@ int checkFullRow(int);
 int checkFullCol(int);
 int checkKeys(char, int, int);
 int checkInitialKeys();
+
+//Part 2 Solver
+void initializeConstraints();
+void initializeClues();
+int returnRow(int);
+int returnCol(int);
+void setValue(char, int, int);
+void removeConstraint(int, int, int);
+void edgeClueElimination();
 
 /* Hints from our solution (feel free to use or ignore):
 

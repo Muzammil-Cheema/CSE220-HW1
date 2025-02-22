@@ -20,8 +20,6 @@ int filledBoardSpaces = 0;
 
 //Game Board
 char board[MAX_LENGTH][MAX_LENGTH] = {0};
-//Stores top row, then alternates between left and right keys, ends with bottom key row. 
-// char visibleBuildings[4*MAX_LENGTH];
 //User choice string variable
 char choice[5];
 
@@ -378,12 +376,234 @@ int checkInitialKeys(){
     return 1;
 }
 
+
+
+
+
+
+
+
+
+
+//Part 2; Solution Heuristics
+//3D char array holding possible values for each board cell as a string
+char constraints[MAX_LENGTH][MAX_LENGTH][MAX_LENGTH + 1] = {0};
+int boardClues[4*MAX_LENGTH];
+
+//Prints constraints array. Only used for debugging and visualization by programmer. 
+void printConstraints(){
+    for (int i = 0; i < boardSize; i++){
+        for (int j = 0; j < boardSize; j++){
+            printf("%s\t", constraints[i][j]);
+        }
+        printf("\n");
+    }
+}
+
 int solve(const char *initial_state, const char *keys, int size){
-	(void) initial_state;
-	(void) keys;
-	(void) size;
-	
+    initialize_board(initial_state, keys, size);
+    initializeClues();
+    initializeConstraints();
+    printBoard();
+    printConstraints();
+
+    edgeClueElimination();
+
+    printBoard();
+    printConstraints();
 	return 0;
+}
+
+//Stores an array of possible values for each cell in board. This is stored in the 3D char array "constraints." 
+void initializeConstraints(){
+    for (int i = 0; i < boardSize; i++){
+        for (int j = 0; j < boardSize; j++){
+            if (board[i][j] != '-'){
+                setValue(board[i][j], i, j);
+            }
+            else {
+                for (int k = 0; k < boardSize; k++){
+                    constraints[i][j][k] = '1' + k;
+                }
+                constraints[i][j][boardSize] = '\0';
+            }
+        }
+    }
+}
+
+//Stores keys in a single array, clues, in the order top from left to right, bottom from left to right, left from top to bottom, and right from top to bottom. 
+void initializeClues(){
+    int i = 0;
+    for (; i < boardSize; i++)
+        boardClues[i] = top_key[i];
+    for (; i < 2*boardSize; i++)
+        boardClues[i] = bottom_key[i-boardSize];
+    for (; i < 3*boardSize; i++)
+        boardClues[i] = left_key[i-2*boardSize];
+    for (; i < 4*boardSize; i++)
+        boardClues[i] = right_key[i-3*boardSize];
+}
+
+//Return the row that the given clue corresponds to. The clue is passed by its index in boardClues[]. 
+int returnRow(int clueIndex){
+    if (2*boardSize <= clueIndex && clueIndex < 3*boardSize)
+        return clueIndex - 2*boardSize;
+    if (3*boardSize <= clueIndex && clueIndex < 4*boardSize)
+        return clueIndex - 3*boardSize;
+    return -1;
+}
+
+//Return the col that the given clue corresponds to. The clue is passed by its index in boardClues[]. 
+int returnCol(int clueIndex){
+    if (0 <= clueIndex && clueIndex < boardSize)
+        return clueIndex;
+    if (boardSize <= clueIndex && clueIndex < 2*boardSize)
+        return clueIndex - boardSize;
+    return -1;
+}
+
+//Adds a board value and removes constraints from the corresponding cell by setting constraint to "-". 
+void setValue(char val, int row, int col){
+    if (board[row][col] == '-')
+        board[row][col] = val;
+    constraints[row][col][0] = '-';
+    constraints[row][col][1] = '\0'; 
+}
+
+//Removes the given character from the constraints list at a given cell. If all constraints are removed, the constraints string is set to "X". 
+void removeConstraint(int val, int row, int col){
+    char* s = constraints[row][col];
+    val += '0';
+    int i = 0;
+
+    //Searches for removal character
+    while(s[i]){
+        //When removal character found, shift all elements left in char array
+        if (s[i] == val){
+            while(s[i+1]){
+                s[i] = s[i+1];
+                i++;
+            }
+            s[i] = '\0';
+            break;
+        }
+        i++;
+    }
+
+    //If there are no possible values left for the cell, constraints for that cell are set to "X".  
+    if (strlen(constraints[row][col]) == 0){
+        s[0] = 'X';
+        s[1] = '\0';
+    }
+}
+
+//Apply edge clue elimnation heuristic with each given clue
+void edgeClueElimination(){
+    int row, col, clue, i = 0;
+
+    //Top column clues
+    for (; i < boardSize; i++){
+        clue = boardClues[i];
+        col = returnCol(i);
+
+        //Skip if clue is 0
+        if (clue == 0)
+            continue;
+        //Fill column if clue means all buildings are visible
+        else if (clue == boardSize)
+            for (int j = 0; j < boardSize; j++)
+                setValue('1' + j, j ,col);
+        //Fill adjacent cell with largest building if clue is 1
+        else if (clue == 1)
+            setValue('0' + boardSize, 0, col);
+        //For all other clue values (1 < clue < boardSize), remove possible constraints based on min of N-c+d+2
+        else {
+            int min;
+            for (int j = 0; j < boardSize; j++){
+                min = boardSize - clue + j + 2;
+                for (int k = min; k <= boardSize; k++)
+                    removeConstraint(k, j, col);
+            }
+        }
+    }
+
+    //Bottom column clues
+    for (; i < 2*boardSize; i++){
+        clue = boardClues[i];
+        col = returnCol(i);
+
+        //Skip if clue is 0
+        if (clue == 0)
+            continue;
+        //Fill column if clue means all buildings are visible
+        else if (clue == boardSize)
+            for (int j = boardSize-1; j >= 0; j--)
+                setValue('0'+boardSize-j, j ,col);
+        //Fill adjacent cell with largest building if clue is 1
+        else if (clue == 1)
+            setValue('0'+boardSize, boardSize-1, col);
+        //For all other clue values (1 < clue < boardSize), remove possible constraints based on min of N-c+d+2
+        else {
+            int min;
+            for (int j = boardSize-1; j >= 0; j--){
+                min = boardSize - clue + (boardSize - 1 - j) + 2;
+                for (int k = min; k <= boardSize; k++)
+                    removeConstraint(k, j, col);
+            }
+        }
+    }
+
+    //Left row clues
+    for (; i < 3*boardSize; i++){
+        clue = boardClues[i];
+        row = returnRow(i);
+
+        //Skip if clue is 0
+        if (clue == 0)
+            continue;
+        //Fill row if clue means all buildings are visible
+        else if (clue == boardSize)
+            for (int j = 0; j < boardSize; j++)
+                setValue('1'+j, row, j);
+        //Fill adjacent cell with largest building if clue is 1
+        else if (clue == 1)
+            setValue('0'+boardSize, row, 0);
+        //For all other clue values (1 < clue < boardSize), remove possible constraints based on min of N-c+d+2
+        else {
+            int min;
+            for (int j = 0; j < boardSize; j++){
+                min = boardSize - clue + j + 2;
+                for (int k = min; k <= boardSize; k++)
+                    removeConstraint(k, row, j);
+            }
+        }
+    }
+
+    //Right row clues
+    for (; i < 4*boardSize; i++){
+        clue = boardClues[i];
+        row = returnRow(i);
+
+        //Skip if clue is 0
+        if (clue == 0)
+            continue;
+        //Fill row if clue means all buildings are visible
+        else if (clue == boardSize)
+            for (int j = boardSize-1; j >= 0; j--)
+                setValue('0'+boardSize-j, row, j);
+        //Fill adjacent cell with largest building if clue is 1
+        else if (clue == 1)
+            setValue('0'+boardSize, row, boardSize-1);
+        //For all other clue values (1 < clue < boardSize), remove possible constraints based on min of N-c+d+2
+        else {
+            int min;
+            for (int j = boardSize-1; j >= 0; j--){
+                min = boardSize - clue + (boardSize - 1 - j) + 2;
+                for (int k = min; k <= boardSize; k++)
+                    removeConstraint(k, row, j);
+            }
+        }
+    } 
 }
 
 
