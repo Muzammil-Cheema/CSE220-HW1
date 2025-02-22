@@ -25,6 +25,7 @@ int checkKeys(char, int, int);
 int checkInitialKeys();
 
 //Part 2 Solver
+//Setup and heuristic 1
 void initializeConstraints();
 void initializeClues();
 int returnRow(int);
@@ -32,6 +33,11 @@ int returnCol(int);
 void setValue(char, int, int);
 void removeConstraint(int, int, int);
 void edgeClueElimination();
+
+//Heuristic 2
+void cellProp(int, int, int);
+int compareConstraints(char[MAX_LENGTH][MAX_LENGTH][MAX_LENGTH+1]);
+void constraintPropagation();
 
 /* Hints from our solution (feel free to use or ignore):
 

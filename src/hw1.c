@@ -393,12 +393,13 @@ int checkInitialKeys(){
 
 
 
-//Part 2; Solution Heuristics
+//Part 2: Solution Heuristics
+//Heuristic 1
 //3D char array holding possible values for each board cell as a string
 char constraints[MAX_LENGTH][MAX_LENGTH][MAX_LENGTH + 1] = {0};
 int boardClues[4*MAX_LENGTH];
 
-//Prints constraints array. Only used for debugging and visualization by programmer. 
+//Prints constraints 2D array. Only used for debugging and visualization by programmer. 
 void printConstraints(){
     for (int i = 0; i < boardSize; i++){
         for (int j = 0; j < boardSize; j++){
@@ -406,6 +407,11 @@ void printConstraints(){
         }
         printf("\n");
     }
+}
+
+//Prints constraints for a single cell. Only used for debugging and visualization by programmer.
+void printCellConstraints(int row, int col){
+    printf("Constraints for [%d][%d]: %s\n", row, col, constraints[row][col]);
 }
 
 int solve(const char *initial_state, const char *keys, int size){
@@ -416,23 +422,24 @@ int solve(const char *initial_state, const char *keys, int size){
     printConstraints();
 
     edgeClueElimination();
+    // constraintPropagation();
 
     printBoard();
     printConstraints();
 	return 0;
 }
 
+
+
 //Stores an array of possible values for each cell in board. This is stored in the 3D char array "constraints." 
 void initializeConstraints(){
     for (int i = 0; i < boardSize; i++){
         for (int j = 0; j < boardSize; j++){
-            if (board[i][j] != '-'){
+            if (isdigit(board[i][j]))
                 setValue(board[i][j], i, j);
-            }
             else {
-                for (int k = 0; k < boardSize; k++){
+                for (int k = 0; k < boardSize; k++)
                     constraints[i][j][k] = '1' + k;
-                }
                 constraints[i][j][boardSize] = '\0';
             }
         }
@@ -470,15 +477,17 @@ int returnCol(int clueIndex){
     return -1;
 }
 
-//Adds a board value and removes constraints from the corresponding cell by setting constraint to "-". 
+//Adds a board value and removes constraints from the corresponding cell by setting constraint to the determined board value. 
 void setValue(char val, int row, int col){
     if (board[row][col] == '-')
         board[row][col] = val;
-    constraints[row][col][0] = '-';
+    constraints[row][col][0] = val;
     constraints[row][col][1] = '\0'; 
+    printf("Value ");
+    printCellConstraints(row, col);
 }
 
-//Removes the given character from the constraints list at a given cell. If all constraints are removed, the constraints string is set to "X". 
+//Removes the given character from the constraints list at a given cell. If one constraint is left, then the board value is set using setValue. If all constraints are removed, the constraints string is set to "X". 
 void removeConstraint(int val, int row, int col){
     char* s = constraints[row][col];
     val += '0';
@@ -498,11 +507,17 @@ void removeConstraint(int val, int row, int col){
         i++;
     }
 
+    //If there's only one possible value left, set the value and constraint to that value
+    // if (strlen(constraints[row][col]) == 1)
+    //     setValue(val, row, col);
     //If there are no possible values left for the cell, constraints for that cell are set to "X".  
     if (strlen(constraints[row][col]) == 0){
         s[0] = 'X';
         s[1] = '\0';
     }
+
+    printf("Remove ");
+    printCellConstraints(row, col);
 }
 
 //Apply edge clue elimnation heuristic with each given clue
@@ -616,9 +631,46 @@ void edgeClueElimination(){
 
 
 
+//Heuristic 2
+//When a board value is determined, that value is removed from the possibilities of all other cells that share a row or column with the solved cell. 
+void cellProp(int val, int row, int col){
+    for (int i = 0; i < boardSize; i++)
+        if (!isdigit(board[row][i]))
+            removeConstraint(val, row, i);
+    for (int i = 0; i < boardSize; i++)
+        if (!isdigit(board[i][col]))
+            removeConstraint(val, i, col);
+}
+
+//Used to compare the constraints 3D array before and after constraint propagation.
+int compareConstraints(char array[MAX_LENGTH][MAX_LENGTH][MAX_LENGTH+1]){
+    for (int i = 0; i < boardSize; i++)
+        for (int j = 0; j < boardSize; j++)
+            if (strcmp(constraints[i][j], array[i][j]) != 0)
+                return 1;
+    return 0;
+}
+
+//Repeatedly performs constraint propagation heuristic until no new values are determined.  
+void constraintPropagation(){
+    char prePropConstraints[MAX_LENGTH][MAX_LENGTH][MAX_LENGTH+1] = {0};
+    int fullyPropagated = 1;
+
+    while (fullyPropagated){
+        //Creates a copy of the constraints before each propagation takes places.
+        for (int i = 0; i < boardSize; i++)
+            for (int j = 0; j < boardSize; j++)
+                strncpy(prePropConstraints[i][j], constraints[i][j], MAX_LENGTH);
+        
+        //Propagates for each solved cell. 
+        for (int i = 0; i < boardSize; i++)
+            for (int j = 0; j < boardSize; j++)
+                if (isdigit(board[i][j]))
+                    cellProp(board[i][j]-'0', i, j);
+    
+        //Ends propagation loop when no new values are determined on the board. 
+        fullyPropagated = compareConstraints(prePropConstraints);
+    }
+}
 
 
-//Observations
-//Range of visible buildings from both ends of one row/column is [2, n+1] where n is the board size. 
-//Strings can be traversed and stored as char pointers!!
-//Last argument (visible buildings) is ordered as top, bottom, left, right
