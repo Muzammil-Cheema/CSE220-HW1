@@ -119,6 +119,8 @@ void game(){
     }
 }
 
+
+
 //Requirement 1B
 int initialize_board(const char *initial_state, const char *keys, int size) {
 	if (size < 2 || size > 8)
@@ -414,6 +416,8 @@ void printCellConstraints(int row, int col){
     printf("Constraints for [%d][%d]: %s\n", row, col, constraints[row][col]);
 }
 
+
+
 int solve(const char *initial_state, const char *keys, int size){
     initialize_board(initial_state, keys, size);
     initializeClues();
@@ -422,7 +426,11 @@ int solve(const char *initial_state, const char *keys, int size){
     printConstraints();
 
     edgeClueElimination();
+    printBoard();
+    printConstraints();
     constraintPropagation();
+    processOfElimination();
+
 
     printBoard();
     printConstraints();
@@ -656,11 +664,15 @@ int compareConstraints(char array[MAX_LENGTH][MAX_LENGTH][MAX_LENGTH+1]){
 }
 
 //Repeatedly performs constraint propagation heuristic until no new values are determined.  
-void constraintPropagation(){
+int constraintPropagation(){
+    //Holds a copy of constraints before each propagation iteration
     char prePropConstraints[MAX_LENGTH][MAX_LENGTH][MAX_LENGTH+1] = {0};
+    //Flag to check if any changes were made between iterations
     int fullyPropagated = 1;
+    //Count of how many iterations were done. This is used to go back and forth between heuristics 2 and 3. 
+    int iterCount = -1;
 
-    while (fullyPropagated){
+    do {
         //Creates a copy of the constraints before each propagation takes places.
         for (int i = 0; i < boardSize; i++)
             for (int j = 0; j < boardSize; j++)
@@ -674,7 +686,124 @@ void constraintPropagation(){
     
         //Ends propagation loop when no new constraints are removed. 
         fullyPropagated = compareConstraints(prePropConstraints);
-    }
+        iterCount++;
+    } while (fullyPropagated);
+    return iterCount;
 }
 
 
+
+//Heuristic 3
+int containsNumber(const char *string, int sub){
+    sub += '0';
+    for (int i = 0; string[i] != '\0'; i++){
+        if (string[i] == sub)
+            return 1;
+    }
+
+    return 0;
+}
+
+void processOfElimination(){
+    int valCount[MAX_LENGTH] = {0};
+    int changeFlag = 0;
+    // int tempCount = -1;
+
+    do {
+        changeFlag = 0;
+
+        //Checks rows for cases where a possible value is present in only one constraint list. In this case, the corresponding cell must be set to that value. 
+        for (int i = 0; i < boardSize; i++){
+            for (int j = 0; j < boardSize; j++)
+                if (!isdigit(board[i][j]))
+                    for (int k = 0; constraints[i][j][k] != '\0'; k++)
+                        valCount[constraints[i][j][k]-'1']++;
+
+            //If there are any possible values that only appear once, the cell with the unique possible value is found and is set to that value. 
+            // printf("ValCount: ");
+            // for (int k = 0; k < boardSize; k++){
+            //     printf("%d ", valCount[k]);
+            // }
+            // printf("\n");
+            for (int k = 0; k < boardSize; k++){
+                if (valCount[k] == 1){
+                    changeFlag = 1;
+                    // printBoard();
+                    // printConstraints();
+                    for (int j = 0; j < boardSize; j++){
+                        if (containsNumber(constraints[i][j], k+1)){
+                            setValue(k+'1', i, j);
+                            break;
+                        }
+                    }
+                }
+            }
+
+            //Resets valCount to 0s
+            for (int k = 0; k < boardSize; k++)
+                valCount[k] = 0;
+        }
+
+        // printf("ROW POE\n");
+        // printBoard();
+        // printConstraints();
+
+        if (constraintPropagation() > 0)
+            changeFlag = 1;
+        
+        // printf("PROP POE\n");
+        // printBoard();
+        // printConstraints();
+
+
+        //Checks columns for cases where a possible value is present in only one constraint list. In this case, the corresponding cell must be set to that value. 
+        for (int i = 0; i < boardSize; i++){
+            for (int j = 0; j < boardSize; j++)
+                if (!isdigit(board[j][i]))
+                    for (int k = 0; constraints[j][i][k] != '\0'; k++)
+                        valCount[constraints[j][i][k]-'1']++;
+
+            //If there are any possible values that only appear once, the cell with the unique possible value is found and is set to that value. 
+            // printf("ValCount: ");
+            // for (int k = 0; k < boardSize; k++){
+            //     printf("%d ", valCount[k]);
+            // }
+            // printf("\n");
+            for (int k = 0; k < boardSize; k++){
+                if (valCount[k] == 1){
+                    changeFlag = 1;
+                    // printBoard();
+                    // printConstraints();
+                    for (int j = 0; j < boardSize; j++){
+                        if (containsNumber(constraints[j][i], k+1)){
+                            setValue(k+'1', j, i);
+                            break;
+                        }
+                    }
+                }
+            }
+
+            //Reset valCount to 0s
+            for (int k = 0; k < boardSize; k++)
+                valCount[k] = 0;
+        }
+
+        // printf("COL POE\n");
+        // printBoard();
+        // printConstraints();
+
+
+        if (constraintPropagation() > 0)
+            changeFlag = 1;
+        
+        // printf("PROP POE\n");
+        // printBoard();
+        // printConstraints();
+
+        // if (changeFlag == 100)
+        //     printf("CHANGE FLAG");
+        // tempCount++;
+    } while (changeFlag);
+
+    
+}

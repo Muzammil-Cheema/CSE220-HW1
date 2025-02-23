@@ -37,7 +37,11 @@ void edgeClueElimination();
 //Heuristic 2
 void cellProp(int, int, int);
 int compareConstraints(char[MAX_LENGTH][MAX_LENGTH][MAX_LENGTH+1]);
-void constraintPropagation();
+int constraintPropagation();
+
+//Heuristic 3
+int containsNumber(const char*, int);
+void processOfElimination();
 
 /* Hints from our solution (feel free to use or ignore):
 
