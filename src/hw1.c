@@ -25,7 +25,7 @@ char choice[5];
 
 
 
-//Plays the Skyscrapers game
+//Allows the user to play the Skyscrapers game
 //Requirement 1D
 void game(){
     //Initial check of how many board spaces are pre-filled. Used for winning condition check.
@@ -397,8 +397,10 @@ int checkInitialKeys(){
 
 //Part 2: Solution Heuristics
 //Heuristic 1
+
 //3D char array holding possible values for each board cell as a string
 char constraints[MAX_LENGTH][MAX_LENGTH][MAX_LENGTH + 1] = {0};
+//Holds all clues on the board in top, bottom, left, right order. 
 int boardClues[4*MAX_LENGTH];
 
 //Prints constraints 2D array. Only used for debugging and visualization by programmer. 
@@ -426,11 +428,9 @@ int solve(const char *initial_state, const char *keys, int size){
     printConstraints();
 
     edgeClueElimination();
-    printBoard();
-    printConstraints();
     constraintPropagation();
-    processOfElimination();
 
+    while(processOfElimination() || sequenceFiltration()){}
 
     printBoard();
     printConstraints();
@@ -454,7 +454,7 @@ void initializeConstraints(){
     }
 }
 
-//Stores keys in a single array, clues, in the order top from left to right, bottom from left to right, left from top to bottom, and right from top to bottom. 
+//Stores keys in a single array, boardClues, in the order top from left to right, bottom from left to right, left from top to bottom, and right from top to bottom. 
 void initializeClues(){
     int i = 0;
     for (; i < boardSize; i++)
@@ -654,7 +654,7 @@ void cellProp(int val, int row, int col){
     }
 }
 
-//Used to compare the constraints 3D array before and after constraint propagation.
+//Used to compare the constraints 3D array before and after constraint propagation. Returns 1 if not the same or 0 if there were no changes. 
 int compareConstraints(char array[MAX_LENGTH][MAX_LENGTH][MAX_LENGTH+1]){
     for (int i = 0; i < boardSize; i++)
         for (int j = 0; j < boardSize; j++)
@@ -704,10 +704,11 @@ int containsNumber(const char *string, int sub){
     return 0;
 }
 
-void processOfElimination(){
+//Returns 0 if no changes were made. 
+int processOfElimination(){
     int valCount[MAX_LENGTH] = {0};
     int changeFlag = 0;
-    // int tempCount = -1;
+    int returnFlag = 0;
 
     do {
         changeFlag = 0;
@@ -800,10 +801,200 @@ void processOfElimination(){
         // printBoard();
         // printConstraints();
 
-        // if (changeFlag == 100)
-        //     printf("CHANGE FLAG");
-        // tempCount++;
+        if (changeFlag == 1)
+            returnFlag++;
     } while (changeFlag);
 
+    return returnFlag;
+}
+
+
+
+
+
+
+
+
+
+
+//Part 3
+//Heuristic 4: Clue Elimination/Sequence Filtration
+//Stores all the valid sequences for a single row or column at a time. Validity is determined by isValidSequence and changes to the array are made by generateRowSequences and the main sequenceFiltration function. 
+char validSequences[MAX_SEQUENCE_CAP][MAX_LENGTH+1] = {0};
+int validSequencesSize = 0;
+
+int leftClueIndex(int row){
+    return 2*boardSize + row; 
+}
+
+int rightClueIndex(int row){
+    return 3*boardSize + row; 
+}
+
+int topClueIndex(int col){
+    return col;
+}
+
+int bottomClueIndex(int col){
+    return boardSize + col;
+}
+
+
+//Checks if a sequence is valid using both of its corresponding clues. Accounts for cases where either clue is 0, although, that check should happen before sequences are generated in the case where both clues are 0. Works for both rows and columns. clue1 should be the clue that appears earlier in the boardClues array (topClue, bottomClue and leftClue, rightClue are the only valid orders).  
+int isValidSequence(char sequence[MAX_LENGTH+1], int clue1, int clue2){
+    int max = 0, visibleCount = 0; 
+    if (clue1 != 0){
+        for (int i = 0; sequence[i] != '\0' && max != boardSize; i++){
+            if (sequence[i] > max){
+                max = sequence[i];
+                visibleCount++;
+            }
+        }
+        if (visibleCount != clue1)
+            return 0;    
+    }
     
+    max = 0, visibleCount = 0;
+    if (clue2 != 0){
+        for (int i = boardSize; i >= 0 && max != boardSize; i--){
+            if (sequence[i] > max){
+                max = sequence[i];
+                visibleCount++;
+            }
+        }
+        if (visibleCount != clue2)
+            return 0;
+    }
+    
+    return 1;
+}
+
+//Generates all possible sequences for a row. Uses isValidSequence() to check if a sequence is valid according to its two clues and adds the sequence to the validSequences 2D array if true. validSequencesSize must also be incremented as it keeps track of how many elements are in the validSequences array for iteration and assists in optimization. The buildingUsage array tracks if a digit has already been used in the current sequence and will orevent generating sequences with repeated digits.  
+void generateRowSequences(char currentSequence[MAX_LENGTH+1], int buildingUsage[MAX_LENGTH], int row, int sequenceCol){
+    if (sequenceCol == boardSize){
+        currentSequence[boardSize] = '\0';
+        if (isValidSequence(currentSequence, boardClues[leftClueIndex(row)], boardClues[rightClueIndex(row)]) == 1){
+            strncpy(validSequences[validSequencesSize], currentSequence, MAX_LENGTH+1);
+            validSequencesSize++;
+        }
+        return;
+    }
+
+    for (int k = 0; constraints[row][sequenceCol][k] != '\0'; k++){
+        if (buildingUsage[constraints[row][sequenceCol][k] - '1'] != 0)
+            continue;
+        currentSequence[sequenceCol] = constraints[row][sequenceCol][k];
+        buildingUsage[constraints[row][sequenceCol][k] - '1']++;
+        generateRowSequences(currentSequence, buildingUsage, row, sequenceCol+1);
+        buildingUsage[constraints[row][sequenceCol][k] - '1']--;
+    }
+}
+
+//Column equivalent of generateRowSequences
+void generateColSequences(char currentSequence[MAX_LENGTH+1], int buildingUsage[MAX_LENGTH], int col, int sequenceRow){
+    if (sequenceRow == boardSize){
+        currentSequence[boardSize] = '\0';
+        if (isValidSequence(currentSequence, boardClues[topClueIndex(col)], boardClues[bottomClueIndex(col)]) == 1){
+            strncpy(validSequences[validSequencesSize], currentSequence, MAX_LENGTH+1);
+            validSequencesSize++;
+        }
+        return;
+    }
+
+    for (int k = 0; constraints[sequenceRow][col][k] != '\0'; k++){
+        if (buildingUsage[constraints[sequenceRow][col][k] - '1'] != 0)
+            continue;
+        currentSequence[sequenceRow] = constraints[sequenceRow][col][k];
+        buildingUsage[constraints[sequenceRow][col][k] - '1']++;
+        generateColSequences(currentSequence, buildingUsage, col, sequenceRow+1);
+        buildingUsage[constraints[sequenceRow][col][k] - '1']--;
+    }
+}
+
+//Performs repeated Sequence Filtration until no new improvements could be discovered. 
+int sequenceFiltration(){
+    int iterCount = -1;
+    //Holds a copy of constraints before each filtration iteration
+    char preFilterConstraints[MAX_LENGTH][MAX_LENGTH][MAX_LENGTH+1] = {0};
+
+    do {
+        //Creates a copy of the constraints before each filtration takes places.
+        for (int i = 0; i < boardSize; i++)
+            for (int j = 0; j < boardSize; j++)
+                strncpy(preFilterConstraints[i][j], constraints[i][j], MAX_LENGTH);
+        
+        //Iterate through rows
+        for (int i = 0; i < boardSize; i++){
+            char currentSequence[MAX_LENGTH+1] = {0};
+            int buildingUsage[MAX_LENGTH] = {0};
+            //Generate sequences for the given row. 
+            generateRowSequences(currentSequence, buildingUsage, i, 0);
+
+            //Tracks how many times each digit has appeared in a given column within the valid sequences.
+            int elementsCount[MAX_LENGTH] = {0}; 
+            for (int k = 0; k < boardSize; k++){   //For each index/col in a sequence
+                for (int j = 0; j < validSequencesSize; j++)       //For each sequence
+                    elementsCount[validSequences[j][k]-'1']++;      //Increment elementCount 
+                for (int j = 0; j < boardSize; j++){
+                    //If a digit doesnt appear in any possible sequence for the ith row in the kth column, we can remove that constraint from the [i][k] cell. 
+                    if (elementsCount[j] == 0)
+                        removeConstraint(j+1, i, k);
+                }
+                //Resets elementCount for next column of the sequences
+                for (int j = 0; j < boardSize; j++)
+                    elementsCount[j] = 0;
+            }
+
+            //Should print the valid sequences for every row. 
+            // printf("-------------------------\nROW %d SEQUENCES\n", i);
+            for (int j = 0; j < validSequencesSize; j++){
+                // printf("%s\n", validSequences[j]);
+                validSequences[j][0] = '\0';
+            }
+            validSequencesSize = 0;
+        }
+
+
+
+        //Iterate through cols
+        for (int i = 0; i < boardSize; i++){
+            char currentSequence[MAX_LENGTH+1] = {0};
+            int buildingUsage[MAX_LENGTH] = {0};
+            //Generate sequences for the given col. 
+            generateColSequences(currentSequence, buildingUsage, i, 0);
+
+            //Tracks how many times each digit has appeared in a given row within the valid sequences.
+            int elementsCount[MAX_LENGTH] = {0}; 
+            for (int k = 0; k < boardSize; k++){   //For each index/row in a sequence
+                for (int j = 0; j < validSequencesSize; j++)       //For each sequence
+                    elementsCount[validSequences[j][k]-'1']++;      //Increment elementCount 
+                for (int j = 0; j < boardSize; j++){
+                    //If a digit doesnt appear in any possible sequence for the ith row in the kth column, we can remove that constraint from the [i][k] cell. 
+                    if (elementsCount[j] == 0)
+                        removeConstraint(j+1, k, i);
+                }
+                //Resets elementCount for next column of the sequences
+                for (int j = 0; j < boardSize; j++)
+                    elementsCount[j] = 0;
+            }
+
+            //Should print the valid sequences for every row. 
+            // printf("-------------------------COL %d SEQUENCES\n", i);
+            for (int j = 0; j < validSequencesSize; j++){
+                // printf("%s\n", validSequences[j]);
+                validSequences[j][0] = '\0';
+            }
+            validSequencesSize = 0;
+        }
+
+        iterCount++;
+    } while(compareConstraints(preFilterConstraints));
+    
+    //Once all constraints are organized, perform one sweep over the constraints to see if any cells have been resolved. 
+    for (int i = 0; i < boardSize; i++)
+        for (int j = 0; j < boardSize; j++)
+            if (board[i][j] == '-' && strlen(constraints[i][j]) == 1)
+                setValue(constraints[i][j][0], i, j);
+
+    return iterCount;
 }

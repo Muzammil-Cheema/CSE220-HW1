@@ -41,7 +41,12 @@ int constraintPropagation();
 
 //Heuristic 3
 int containsNumber(const char*, int);
-void processOfElimination();
+int processOfElimination();
+
+//Part 3: Heuristic 4
+int isValidSequence(char[MAX_LENGTH+1], int , int);
+void generateRowSequences(char[MAX_LENGTH+1], int[MAX_LENGTH], int, int );
+int sequenceFiltration();
 
 /* Hints from our solution (feel free to use or ignore):
 
